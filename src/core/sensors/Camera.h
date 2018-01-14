@@ -1,6 +1,8 @@
 #ifndef ROVER_CAMERA_H
 #define ROVER_CAMERA_H
 
+#pragma GCC optimize ("-O3")
+
 #include "Arduino.h"
 
 #define VC0706_RESET 0x26
@@ -16,6 +18,7 @@
 #define VC0706_COMM_MOTION_CTRL 0x37
 #define VC0706_COMM_MOTION_STATUS 0x38
 #define VC0706_COMM_MOTION_DETECTED 0x39
+#define VC0706_POWER_SAVE_CTRL 0x3E
 #define VC0706_MOTION_CTRL 0x42
 #define VC0706_MOTION_STATUS 0x43
 #define VC0706_TVOUT_CTRL 0x44
@@ -70,6 +73,8 @@ class Camera {
                    uint16_t &pan, uint16_t &tilt);
     boolean setPTZ(uint16_t wz, uint16_t hz, uint16_t pan, uint16_t tilt);
 
+    boolean startPowerSave();
+    boolean stopPowerSave();
 
   private:
     uint8_t serialNum;

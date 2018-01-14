@@ -1,5 +1,8 @@
 #include "Camera.h"
 
+//Everything is under Rover
+namespace Rover{
+
 // Initialization code used by all constructor types
 void Camera::common_init(void) {
     hwSerial = NULL;
@@ -265,3 +268,30 @@ void Camera::printBuff() {
     }
     Serial.println();
 }
+
+//Experimental
+boolean Camera::startPowerSave() {
+    uint8_t args[] = {0x03, 0x00, 0x01, 0x01};
+    if (!runCommand(VC0706_POWER_SAVE_CTRL, args, sizeof(args), 5))
+        return false;
+    if (!camerabuff[3]) return false;
+    return true;
+}
+
+boolean Camera::stopPowerSave() {
+    uint8_t args[] = {0x03, 0x00, 0x01, 0x00};
+    if (!runCommand(VC0706_POWER_SAVE_CTRL, args, sizeof(args), 5))
+        return false;
+    if (!camerabuff[3]) return false;
+    return true;
+}
+/*
+boolean Camera::setPowerSaveMode(boolean stopFBUF, boolean stopJPG, ) {
+    uint8_t args[] = {0x03, 0x00, 0x01, 0x01};
+    if (!runCommand(VC0706_POWER_SAVE_CTRL, args, sizeof(args), 5))
+        return false;
+    if (!camerabuff[3]) return false;
+    return true;
+}*/
+
+} //end Rover namespace
