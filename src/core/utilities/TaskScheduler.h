@@ -7,31 +7,42 @@
 namespace Rover {
 
 class TaskScheduler {
-    private:
-        void** highPriority;
-        void** medPriority;
-        void** lowPriority;
     public:
-        //This task class serves to encapsulate tasks and
-        // forwards tasks to member functions. It's not needed
-        // if the function is in the global namespace.
-        template <typename Context_t> class Task {
+        //This task class serves to encapsulate tasks. It needs a forwarding function.
+        class Task {
         private:
-            Context_t& context;
-            void (*func)();
+            void *context;
+            void (*func)(void*);
         private:
-            Task(Context_t& context_, void (*func_)()) : context(context_), func(func){}
+            Task(void (*func_)(void*), void * context_) : func(func_), context(context_){}
+            Task(void (*func_)(void*)) : func(func_), context(NULL){}
             void runTask(){
-                (context.*func)();
+                (*func)(context);
             }
+            void addTask(Task* next){
+                nextTask = next;
+            }
+            uint32_t time = 0;
+            Task* nextTask = NULL;
         };
+    private:
+        Task* highPriority;
+        Task* medPriority;
+        Task* lowPriority;
+        uint32_t earliestTime;
+        //Find out what units
+        int timeBuffer = 100;
+    public:
+        typedef enum {
+            HIGH_PRIORITY,
+            MEDIUM_PRIORITY,
+            LOW_PRIORITY
+        } Priority;
+
         TaskScheduler(int8_t timer = -1);
-        boolean addTimerTask();
-        boolean addTask(void (*func)(), );
-        boolean addTask(Task& task, );
+        //boolean addTimerTask();
+        boolean addTask(TaskScheduler::Task* task, Priority priority, uint32_t timeToRun = 0);
         void runTasks(int timeLimit);
-
-
 };
 
 }

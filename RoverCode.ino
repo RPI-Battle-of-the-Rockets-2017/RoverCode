@@ -5,6 +5,7 @@
 #include "src/core/sensors/IMU.h"
 #include "src/core/utilities/Standby.h"
 #include "src/actions/Drive.h"
+#include "src/core/utilities/TaskScheduler.h"
 
 Rover::Camera camera = Rover::Camera(&Serial);
 
