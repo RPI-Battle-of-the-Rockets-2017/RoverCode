@@ -26,9 +26,9 @@ namespace Rover {
     @brief  Abstract away platform differences in Arduino wire library
 */
 /**************************************************************************/
-void IMU::Accelerometer::write8(byte address, byte reg, byte value)
+void IMU::Accelerometer::write8(byte reg, byte value)
 {
-    Wire.beginTransmission(address);
+    Wire.beginTransmission((byte)LSM303_ADDRESS_ACCEL);
     Wire.write((uint8_t)reg);
     Wire.write((uint8_t)value);
     Wire.endTransmission();
@@ -39,14 +39,14 @@ void IMU::Accelerometer::write8(byte address, byte reg, byte value)
     @brief  Abstract away platform differences in Arduino wire library
 */
 /**************************************************************************/
-byte IMU::Accelerometer::read8(byte address, byte reg)
+byte IMU::Accelerometer::read8(byte reg)
 {
     byte value;
 
-    Wire.beginTransmission(address);
+    Wire.beginTransmission((byte)LSM303_ADDRESS_ACCEL);
     Wire.write((uint8_t)reg);
     Wire.endTransmission();
-    Wire.requestFrom(address, (byte)1);
+    Wire.requestFrom((byte)LSM303_ADDRESS_ACCEL, (byte)1);
     value = Wire.read();
     Wire.endTransmission();
 
@@ -108,11 +108,11 @@ bool IMU::Accelerometer::begin()
   Wire.begin();
 
   // Enable the accelerometer (100Hz)
-  write8(LSM303_ADDRESS_ACCEL, CTRL_REG1_A, 0x57);
+  write8(CTRL_REG1_A, 0x57);
 
   // LSM303DLHC has no WHOAMI register so read CTRL_REG1_A back to check
   // if we are connected or not
-  uint8_t reg1_a = read8(LSM303_ADDRESS_ACCEL, CTRL_REG1_A);
+  uint8_t reg1_a = read8(CTRL_REG1_A);
   if (reg1_a != 0x57)
   {
     return false;
@@ -123,20 +123,77 @@ bool IMU::Accelerometer::begin()
 
 /**************************************************************************/
 /*!
+    @brief  Sets up the accelerometer for low power mode and arduino sleep
+*/
+/**************************************************************************/
+bool IMU::Accelerometer::setSleepSettings()
+{
+    // Sets data rate to 400Hz, enables low power mode
+    write8(CTRL_REG1_A, 0x7F);
+    // Verify register set properly
+    if (read8(CTRL_REG1_A) != 0x7F) return false;
+
+    //Enables AOI1 interrupt on INT1
+    write8(CTRL_REG3_A, 0x40);
+    // Verify register set properly
+    if (read8(CTRL_REG3_A) != 0x40) return false;
+
+    //Sets scale to +/- 4g
+    write8(CTRL_REG4_A, 0x10);
+    // Verify register set properly
+    if (read8(CTRL_REG4_A) != 0x10) return false;
+
+    //Sets interrupt to active low
+    write8(CTRL_REG6_A, 0x02);
+    // Verify register set properly
+    if (read8(CTRL_REG6_A) != 0x02) return false;
+
+    //Enables interrupt generation for high X OR high Y OR high Z
+    write8(INT1_CFG_A, 0x2A);
+    // Verify register set properly
+    if (read8(INT1_CFG_A) != 0x2A) return false;
+
+    //Sets interrupt threshold to 2.5g
+    write8(INT1_THS_A, 0x50);
+    // Verify register set properly
+    if (read8(INT1_THS_A) != 0x50) return false;
+
+    //Sets minimum duration for interrupt trigger to 100ms (5/50)
+    write8(INT1_DURATION_A, 0x19);
+    // Verify register set properly
+    if (read8(INT1_DURATION_A) != 0x19) return false;
+
+    return true;
+}
+
+/**************************************************************************/
+/*!
+    @brief  Sets up the accelerometer for normal operation
+*/
+/**************************************************************************/
+bool IMU::Accelerometer::setSleepSettings()
+{
+    //Sets data rate to 400Hz, disables low power mode
+    write8(CTRL_REG1_A, 0x77);
+    // Verify register set properly
+    if (read8(CTRL_REG1_A) != 0x77) return false;
+
+    return true;
+}
+
+/**************************************************************************/
+/*!
     @brief  Gets the most recent sensor event
 */
 /**************************************************************************/
-bool IMU::Accelerometer::getEvent(sensorVec *event) {
-  /* Clear the event */
-  memset(event, 0, sizeof(sensorVec));
-
+bool IMU::Accelerometer::getEvent(SensorVec & event) {
   /* Read new data */
   read();
 
-  event->timestamp = millis();
-  event->x = (float)raw.x * _LSM303ACCEL_MG_LSB * GRAVITY_STANDARD;
-  event->y = (float)raw.y * _LSM303ACCEL_MG_LSB * GRAVITY_STANDARD;
-  event->z = (float)raw.z * _LSM303ACCEL_MG_LSB * GRAVITY_STANDARD;
+  event.timestamp = millis();
+  event.x = (float)raw.x * _LSM303ACCEL_MG_LSB * GRAVITY_STANDARD;
+  event.y = (float)raw.y * _LSM303ACCEL_MG_LSB * GRAVITY_STANDARD;
+  event.z = (float)raw.z * _LSM303ACCEL_MG_LSB * GRAVITY_STANDARD;
 
   return true;
 }

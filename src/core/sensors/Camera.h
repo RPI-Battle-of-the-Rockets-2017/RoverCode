@@ -1,7 +1,9 @@
 #ifndef ROVER_CAMERA_H
 #define ROVER_CAMERA_H
 
+#ifdef OPTIMIZE
 #pragma GCC optimize ("-O3")
+#endif // OPTIMIZE
 
 #include "Arduino.h"
 
