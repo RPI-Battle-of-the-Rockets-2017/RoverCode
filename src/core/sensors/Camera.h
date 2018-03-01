@@ -41,7 +41,7 @@
 #define VC0706_GET_ZOOM 0x53
 
 #define CAMERABUFFSIZ 100
-#define CAMERADELAY 1
+#define CAMERADELAY 3
 
 /**
  * Isolate important camera control functions into here
