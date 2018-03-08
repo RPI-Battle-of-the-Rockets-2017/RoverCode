@@ -37,8 +37,8 @@ class IMU::Magnetometer {
         float _lsm303Mag_Gauss_LSB_XY;  // Varies with gain
         float _lsm303Mag_Gauss_LSB_Z;   // Varies with gain
 
-        void write8(byte address, byte reg, byte value);
-        byte read8(byte address, byte reg);
+        inline void write8(byte reg, byte value);
+        inline byte read8(byte reg);
         void read(void);
     public:
         typedef struct {
@@ -75,7 +75,7 @@ class IMU::Magnetometer {
         void enableAutoRange(bool enable);
         void setMagGain(magGain gain);
         void setMagRate(magRate rate);
-        boolean getEvent(sensorVec*);
+        boolean getEvent(SensorVec&);
 
         magData raw;
         magGain gain;

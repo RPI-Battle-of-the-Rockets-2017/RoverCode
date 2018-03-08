@@ -21,7 +21,14 @@ private:
     class Accelerometer;
     class Magnetometer;
     //class Gyroscope;
+    class Barometer;
     //insert other classes for other components
+
+    static void write8(byte address, byte reg, byte value);
+    static byte read8(byte address, byte reg);
+
+    static uint16_t read16(byte address, byte reg);
+    static int16_t readS16(byte address, byte reg);
 public:
 
     typedef struct{
@@ -50,11 +57,13 @@ public:
     Accelerometer* accelerometer;
     Magnetometer* magnetometer;
     //Gyroscope* gyroscope;
+    Barometer* barometer;
 };
 
 }
 
 #include "IMU/Accelerometer.h"
 #include "IMU/Magnetometer.h"
+#include "IMU/Barometer.h"
 
 #endif // ROVER_IMU_H

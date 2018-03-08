@@ -49,8 +49,8 @@ class IMU::Accelerometer {
             TIME_WINDOW_A       = 0x3D
         } AccelRegisters;
 
-        void write8(byte reg, byte value);
-        byte read8(byte reg);
+        inline void write8(byte reg, byte value);
+        inline byte read8(byte reg);
         void read();
     public:
         typedef struct {
@@ -64,7 +64,7 @@ class IMU::Accelerometer {
         bool begin();
         bool setSleepSettings();
         bool setNormalSettings();
-        bool getEvent(sensorVec&);
+        bool getEvent(SensorVec&);
 
         accelData raw;
 

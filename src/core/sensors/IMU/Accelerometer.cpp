@@ -20,37 +20,12 @@ namespace Rover {
 /***************************************************************************
  PRIVATE FUNCTIONS (Lightly edited)
  ***************************************************************************/
-
-/**************************************************************************/
-/*!
-    @brief  Abstract away platform differences in Arduino wire library
-*/
-/**************************************************************************/
-void IMU::Accelerometer::write8(byte reg, byte value)
-{
-    Wire.beginTransmission((byte)LSM303_ADDRESS_ACCEL);
-    Wire.write((uint8_t)reg);
-    Wire.write((uint8_t)value);
-    Wire.endTransmission();
+inline void IMU::Accelerometer::write8(byte reg, byte value){
+    IMU::write8(LSM303_ADDRESS_ACCEL, reg, value);
 }
 
-/**************************************************************************/
-/*!
-    @brief  Abstract away platform differences in Arduino wire library
-*/
-/**************************************************************************/
-byte IMU::Accelerometer::read8(byte reg)
-{
-    byte value;
-
-    Wire.beginTransmission((byte)LSM303_ADDRESS_ACCEL);
-    Wire.write((uint8_t)reg);
-    Wire.endTransmission();
-    Wire.requestFrom((byte)LSM303_ADDRESS_ACCEL, (byte)1);
-    value = Wire.read();
-    Wire.endTransmission();
-
-    return value;
+inline byte IMU::Accelerometer::read8(byte reg){
+    return IMU::read8(LSM303_ADDRESS_ACCEL, reg);
 }
 
 /**************************************************************************/
@@ -171,7 +146,7 @@ bool IMU::Accelerometer::setSleepSettings()
     @brief  Sets up the accelerometer for normal operation
 */
 /**************************************************************************/
-bool IMU::Accelerometer::setSleepSettings()
+bool IMU::Accelerometer::setNormalSettings()
 {
     //Sets data rate to 400Hz, disables low power mode
     write8(CTRL_REG1_A, 0x77);

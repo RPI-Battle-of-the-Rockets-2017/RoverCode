@@ -19,37 +19,11 @@ namespace Rover {
 /***************************************************************************
  PRIVATE FUNCTIONS
  ***************************************************************************/
-
-/**************************************************************************/
-/*!
-    @brief  Abstract away platform differences in Arduino wire library
-*/
-/**************************************************************************/
-void IMU::Magnetometer::write8(byte address, byte reg, byte value)
-{
-    Wire.beginTransmission(address);
-    Wire.write((uint8_t)reg);
-    Wire.write((uint8_t)value);
-    Wire.endTransmission();
+void IMU::Magnetometer::write8(byte reg, byte value){
+    IMU::write8(LSM303_ADDRESS_MAG, reg, value);
 }
-
-/**************************************************************************/
-/*!
-    @brief  Abstract away platform differences in Arduino wire library
-*/
-/**************************************************************************/
-byte IMU::Magnetometer::read8(byte address, byte reg)
-{
-    byte value;
-
-    Wire.beginTransmission(address);
-    Wire.write((uint8_t)reg);
-    Wire.endTransmission();
-    Wire.requestFrom(address, (byte)1);
-    value = Wire.read();
-    Wire.endTransmission();
-
-    return value;
+byte IMU::Magnetometer::read8(byte reg){
+    return IMU::read8(LSM303_ADDRESS_MAG, reg);
 }
 
 /**************************************************************************/
@@ -118,11 +92,11 @@ bool IMU::Magnetometer::begin()
     Wire.begin();
 
     // Enable the magnetometer
-    write8(LSM303_ADDRESS_MAG, MR_REG_M, 0x00);
+    write8(MR_REG_M, 0x00);
 
     // LSM303DLHC has no WHOAMI register so read CRA_REG_M to check
     // the default value (0b00010000/0x10)
-    uint8_t reg1_a = read8(LSM303_ADDRESS_MAG, CRA_REG_M);
+    uint8_t reg1_a = read8(CRA_REG_M);
     if (reg1_a != 0x10)
     {
         return false;
@@ -151,7 +125,7 @@ void IMU::Magnetometer::enableAutoRange(bool enabled)
 /**************************************************************************/
 void IMU::Magnetometer::setMagGain(magGain gain)
 {
-    write8(LSM303_ADDRESS_MAG, CRB_REG_M, (byte)gain);
+    write8(CRB_REG_M, (byte)gain);
 
     this->gain = gain;
 
@@ -196,7 +170,7 @@ void IMU::Magnetometer::setMagGain(magGain gain)
 void IMU::Magnetometer::setMagRate(magRate rate)
 {
 	byte reg_m = ((byte)rate & 0x07) << 2;
-    write8(LSM303_ADDRESS_MAG, CRA_REG_M, reg_m);
+    write8(CRA_REG_M, reg_m);
 }
 
 
@@ -205,16 +179,13 @@ void IMU::Magnetometer::setMagRate(magRate rate)
     @brief  Gets the most recent sensor event
 */
 /**************************************************************************/
-bool IMU::Magnetometer::getEvent(sensorVec *event) {
+bool IMU::Magnetometer::getEvent(SensorVec& event) {
   bool readingValid = false;
-
-  /* Clear the event */
-  memset(event, 0, sizeof(sensorVec));
 
   while(!readingValid)
   {
 
-    uint8_t reg_mg = read8(LSM303_ADDRESS_MAG, SR_REG_Mg);
+    uint8_t reg_mg = read8(SR_REG_Mg);
     if (!(reg_mg & 0x1)) {
 			return false;
     }
@@ -297,10 +268,10 @@ bool IMU::Magnetometer::getEvent(sensorVec *event) {
     }
   }
 
-  event->timestamp = millis();
-  event->x = (float)raw.x / _lsm303Mag_Gauss_LSB_XY * GAUSS_TO_MICROTESLA;
-  event->y = (float)raw.y / _lsm303Mag_Gauss_LSB_XY * GAUSS_TO_MICROTESLA;
-  event->z = (float)raw.z / _lsm303Mag_Gauss_LSB_Z * GAUSS_TO_MICROTESLA;
+  event.timestamp = millis();
+  event.x = (float)raw.x / _lsm303Mag_Gauss_LSB_XY * GAUSS_TO_MICROTESLA;
+  event.y = (float)raw.y / _lsm303Mag_Gauss_LSB_XY * GAUSS_TO_MICROTESLA;
+  event.z = (float)raw.z / _lsm303Mag_Gauss_LSB_Z * GAUSS_TO_MICROTESLA;
 
 	return true;
 }
