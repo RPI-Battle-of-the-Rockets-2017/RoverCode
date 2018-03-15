@@ -20,17 +20,18 @@ private:
     //Consider exposing these subcomponents to public
     class Accelerometer;
     class Magnetometer;
-    //class Gyroscope;
+    class Gyroscope;
     class Barometer;
     //insert other classes for other components
 
+    //Helper functions for writing and reading registers over I2C
     static void write8(byte address, byte reg, byte value);
     static byte read8(byte address, byte reg);
 
     static uint16_t read16(byte address, byte reg);
     static int16_t readS16(byte address, byte reg);
-public:
 
+public:
     typedef struct{
         int32_t timestamp;      /**< time is in milliseconds */
         union {
@@ -56,7 +57,7 @@ public:
 
     Accelerometer* accelerometer;
     Magnetometer* magnetometer;
-    //Gyroscope* gyroscope;
+    Gyroscope* gyroscope;
     Barometer* barometer;
 };
 
@@ -64,6 +65,7 @@ public:
 
 #include "IMU/Accelerometer.h"
 #include "IMU/Magnetometer.h"
+#include "IMU/Gyroscope.h"
 #include "IMU/Barometer.h"
 
 #endif // ROVER_IMU_H

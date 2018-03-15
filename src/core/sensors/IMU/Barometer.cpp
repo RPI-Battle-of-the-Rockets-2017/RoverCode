@@ -50,17 +50,17 @@ void IMU::Barometer::readCoefficients()
     BMPcoeffs.md  = 2868;
     BMPMode        = 0;
   #else
-    BMPcoeffs.ac1 = readS16(REG_CAL_AC1);
-    BMPcoeffs.ac2 = readS16(REG_CAL_AC2);
-    BMPcoeffs.ac3 = readS16(REG_CAL_AC3);
-    BMPcoeffs.ac4 = read16(REG_CAL_AC4);
-    BMPcoeffs.ac5 = read16(REG_CAL_AC5);
-    BMPcoeffs.ac6 = read16(REG_CAL_AC6);
-    BMPcoeffs.b1 = readS16(REG_CAL_B1);
-    BMPcoeffs.b2 = readS16(REG_CAL_B2);
-    BMPcoeffs.mb = readS16(REG_CAL_MB);
-    BMPcoeffs.mc = readS16(REG_CAL_MC);
-    BMPcoeffs.md = readS16(REG_CAL_MD);
+    BMPcoeffs.ac1 = readS16(CAL_AC1);
+    BMPcoeffs.ac2 = readS16(CAL_AC2);
+    BMPcoeffs.ac3 = readS16(CAL_AC3);
+    BMPcoeffs.ac4 = read16(CAL_AC4);
+    BMPcoeffs.ac5 = read16(CAL_AC5);
+    BMPcoeffs.ac6 = read16(CAL_AC6);
+    BMPcoeffs.b1 = readS16(CAL_B1);
+    BMPcoeffs.b2 = readS16(CAL_B2);
+    BMPcoeffs.mb = readS16(CAL_MB);
+    BMPcoeffs.mc = readS16(CAL_MC);
+    BMPcoeffs.md = readS16(CAL_MD);
   #endif
 
 }
@@ -75,9 +75,9 @@ void IMU::Barometer::readRawTemperature(int32_t *temperature)
     *temperature = 27898;
   #else
     uint16_t t;
-    writeCommand(REG_CONTROL, REG_READTEMPCMD);
+    writeCommand(CONTROL, READTEMPCMD);
     delay(5);
-    t = read16(REG_TEMPDATA);
+    t = read16(TEMPDATA);
     *temperature = t;
   #endif
 }
@@ -95,27 +95,27 @@ void IMU::Barometer::readRawPressure(int32_t *pressure)
     uint16_t p16;
     int32_t  p32;
 
-    writeCommand(REG_CONTROL, REG_READPRESSURECMD + (BMPMode << 6));
+    writeCommand(CONTROL, READPRESSURECMD + (BMPMode << 6));
     switch(BMPMode)
     {
-      case MODE_ULTRALOWPOWER:
+      case ULTRALOWPOWER:
         delay(5);
         break;
-      case MODE_STANDARD:
+      case STANDARD:
         delay(8);
         break;
-      case MODE_HIGHRES:
+      case HIGHRES:
         delay(14);
         break;
-      case MODE_ULTRAHIGHRES:
+      case ULTRAHIGHRES:
       default:
         delay(26);
         break;
     }
 
-    p16 = read16(REG_PRESSUREDATA);
+    p16 = read16(PRESSUREDATA);
     p32 = (uint32_t)p16 << 8;
-    p8 = read8(REG_PRESSUREDATA+2);
+    p8 = read8(PRESSUREDATA+2);
     p32 += p8;
     p32 >>= (8 - BMPMode);
 
@@ -205,13 +205,13 @@ bool IMU::Barometer::begin(BMPModes mode)
   Wire.begin();
 
   /* Mode boundary check */
-  if ((mode > MODE_ULTRAHIGHRES) || (mode < 0))
+  if ((mode > ULTRAHIGHRES) || (mode < 0))
   {
-    mode = MODE_ULTRAHIGHRES;
+    mode = ULTRAHIGHRES;
   }
 
   /* Make sure we have the right device */
-  uint8_t id = read8(REG_CHIPID);
+  uint8_t id = read8(CHIPID);
   if(id != 0x55)
   {
     return false;

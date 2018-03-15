@@ -7,7 +7,7 @@ namespace Rover {
     @brief  Abstract away platform differences in Arduino wire library
 */
 /**************************************************************************/
-static void IMU::write8(byte address, byte reg, byte value)
+void IMU::write8(byte address, byte reg, byte value)
 {
     Wire.beginTransmission(address);
     Wire.write((uint8_t)reg);
@@ -20,7 +20,7 @@ static void IMU::write8(byte address, byte reg, byte value)
     @brief  Abstract away platform differences in Arduino wire library
 */
 /**************************************************************************/
-static byte IMU::read8(byte address, byte reg)
+byte IMU::read8(byte address, byte reg)
 {
     byte value;
 
@@ -39,7 +39,7 @@ static byte IMU::read8(byte address, byte reg)
     @brief  Reads a 16 bit value over I2C
 */
 /**************************************************************************/
-static uint16_t IMU::read16(byte address, byte reg)
+uint16_t IMU::read16(byte address, byte reg)
 {
     uint16_t value;
 
@@ -58,7 +58,7 @@ static uint16_t IMU::read16(byte address, byte reg)
     @brief  Reads a signed 16 bit value over I2C
 */
 /**************************************************************************/
-static int16_t IMU::readS16(byte address, byte reg)
+int16_t IMU::readS16(byte address, byte reg)
 {
   uint16_t i = read16(address, reg);
   return (int16_t)i;
@@ -67,12 +67,14 @@ static int16_t IMU::readS16(byte address, byte reg)
 IMU::IMU(){
     accelerometer = new Accelerometer();
     magnetometer = new Magnetometer();
+    gyroscope = new Gyroscope();
     barometer = new Barometer();
 }
 
 IMU::~IMU(){
     delete accelerometer;
     delete magnetometer;
+    delete gyroscope;
     delete barometer;
 }
 

@@ -123,7 +123,7 @@ void IMU::Magnetometer::enableAutoRange(bool enabled)
     @brief  Sets the magnetometer's gain
 */
 /**************************************************************************/
-void IMU::Magnetometer::setMagGain(magGain gain)
+void IMU::Magnetometer::setMagGain(MagGain gain)
 {
     write8(CRB_REG_M, (byte)gain);
 
@@ -167,7 +167,7 @@ void IMU::Magnetometer::setMagGain(magGain gain)
     @brief  Sets the magnetometer's update rate
 */
 /**************************************************************************/
-void IMU::Magnetometer::setMagRate(magRate rate)
+void IMU::Magnetometer::setMagRate(MagRate rate)
 {
 	byte reg_m = ((byte)rate & 0x07) << 2;
     write8(CRA_REG_M, reg_m);
