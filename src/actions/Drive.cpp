@@ -9,69 +9,72 @@
 //add way to calibrate stopVal and speedCalibration through Drive constructor
 
 //constant values
-int stopVal = 90; //center value / value that stops the motor
-float speedCalibration = (150 - 90) / 100; // (max value - stopping value) / (half of total speed range wanted, i.e. -100 to 100)
+#define STOP_VAL 90 //center value / value that stops the motor
+#define SPEED_CALIBRATION ((150 - 90) / 100.0) // (max value - stopping value) / (half of total speed range wanted, i.e. -100 to 100)
 
+namespace Rover {
 
-void drive(int speed) {//takes an input value from -100(reverse) to 100(forward)
+void Drive::drive(int speed) {//takes an input value from -100(reverse) to 100(forward)
 	if (rightServReversed) {
-		int lSpeed = stopVal + speedCalibration * speed;	//convert to valid input range of 30(full speed reverse) to 150(full speed forward)
-		int rSpeed = stopVal - speedCalibration * speed;
+		int lSpeed = STOP_VAL + SPEED_CALIBRATION * speed;	//convert to valid input range of 30(full speed reverse) to 150(full speed forward)
+		int rSpeed = STOP_VAL - SPEED_CALIBRATION * speed;
 		lServo.write(lSpeed);			//write speed for both motors
 		rServo.write(rSpeed);
 	}
 	else { //same direction of rotation
-		int lSpeed = stopVal + speedCalibration * speed;
-		int rSpeed = stopVal + speedCalibration * speed;
+		int lSpeed = STOP_VAL + SPEED_CALIBRATION * speed;
+		int rSpeed = STOP_VAL + SPEED_CALIBRATION * speed;
 		lServo.write(lSpeed);			//write speed for both motors
 		rServo.write(rSpeed);
 
 	}
 }
 
-void halt() { //Stop the motors
-	lServo.write(stopVal);
-	rServo.write(stopVal);
+void Drive::halt() { //Stop the motors
+	lServo.write(STOP_VAL);
+	rServo.write(STOP_VAL);
 }
 
-void centerTurn(int speed) { //turn left if negative, right if positive
+void Drive::centerTurn(int speed) { //turn left if negative, right if positive
 	if (rightServReversed) {
-		int lSpeed = stopVal + speedCalibration * speed;
-		int rSpeed = stopVal + speedCalibration * speed;
+		int lSpeed = STOP_VAL - SPEED_CALIBRATION * speed;
+		int rSpeed = STOP_VAL - SPEED_CALIBRATION * speed;
 		lServo.write(lSpeed);			//write speed for both motors
 		rServo.write(rSpeed);
 	}
 	else {	//same direction of rotation
-		int lSpeed = stopVal - speedCalibration * speed; //will turn left if given a negative speed, and right if given a positive speed
-		int rSpeed = stopVal + speedCalibration * speed;
+		int lSpeed = STOP_VAL + SPEED_CALIBRATION * speed; //will turn left if given a negative speed, and right if given a positive speed
+		int rSpeed = STOP_VAL - SPEED_CALIBRATION * speed;
 		lServo.write(lSpeed);			//write speed for both motors
 		rServo.write(rSpeed);
 	}
 }
 
-void pivotTurn(int speed, int direction) { //turns around the axis of a stopped wheel, direction specifies if pivoting CCW(-1) or CW(+1)
+void Drive::pivotTurn(int speed, bool direction) { //turns around the axis of a stopped wheel, direction specifies if pivoting CCW(-1) or CW(+1)
 	if (rightServReversed) {
 		if (speed < 0) {	//pivoting around right wheel
-			int lSpeed = stopVal - speedCalibration * speed * direction;
+			int lSpeed = STOP_VAL - SPEED_CALIBRATION * speed * (direction ? 1 : -1);
 			lServo.write(lSpeed);		//write speed for left motor
-			rServo.write(stopVal);			
+			rServo.write(STOP_VAL);
 		}
 		else {				//pivoting around left wheel
-			int rSpeed = stopVal + speedCalibration * speed * direction;
-			lServo.write(stopVal);			
+			int rSpeed = STOP_VAL - SPEED_CALIBRATION * speed * (direction ? 1 : -1);
+			lServo.write(STOP_VAL);
 			rServo.write(rSpeed);		//write speed for right motor
 		}
 	}
 	else {	//direction of rotation is the same
 		if (speed < 0) {	//pivoting around right wheel
-			int lSpeed = stopVal - speedCalibration * speed * direction;
+			int lSpeed = STOP_VAL - SPEED_CALIBRATION * speed * (direction ? 1 : -1);
 			lServo.write(lSpeed);		//write speed for left motor
-			rServo.write(stopVal);		
+			rServo.write(STOP_VAL);
 		}
 		else {				//pivoting around left wheel
-			int rSpeed = stopVal - speedCalibration * speed * direction;
-			lServo.write(stopVal);		
+			int rSpeed = STOP_VAL + SPEED_CALIBRATION * speed * (direction ? 1 : -1);
+			lServo.write(STOP_VAL);
 			rServo.write(rSpeed);		//write speed for right motor
 		}
 	}
+}
+
 }

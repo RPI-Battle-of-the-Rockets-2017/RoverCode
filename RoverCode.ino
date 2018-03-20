@@ -14,8 +14,10 @@
 
 #include <Servo.h>
 
-//Rover::Camera cam(&Serial1);
+#include "src/actions/Drive.h"
 
+//Rover::Camera cam(&Serial1);
+/*
 Servo left;
 Servo right;
 
@@ -23,8 +25,7 @@ Servo right;
 
 #define MIN 30
 #define MAX 150
-#define LEFT_MID 90
-#define RIGHT_MID 90
+#define MID 90*/
 
 /*
   void setup() {
@@ -52,10 +53,13 @@ Servo right;
   }
 */
 
+Rover::Drive drive(3, 5);
+
 void setup() {
   Serial.begin(38400);
-  left.attach(3);
-  right.attach(5);
+  drive.attach();
+  //left.attach(3);
+  //right.attach(5);
 }
 
 void loop() {
@@ -65,8 +69,9 @@ void loop() {
     incoming = Serial.read();
 
     if (incoming == 'w') {
-      left.write(MAX);
-      right.write(MIN);
+      //left.write(MAX);
+      //right.write(MIN);
+      drive.drive(100);
       while (Serial.available() == 0) {
         Serial.println(Serial.available());
         Serial.println("Driving forward");
@@ -74,8 +79,9 @@ void loop() {
       }
     }
     else if (incoming == 'a') {
-      left.write(MIN);
-      right.write(MIN);
+      //left.write(MIN);
+      //right.write(MIN);
+      drive.centerTurn(100);
       while (Serial.available() == 0) {
         Serial.println(Serial.available());
         Serial.println("Turning left");
@@ -83,9 +89,9 @@ void loop() {
       }
     }
     else if (incoming == 's') {
-
-      left.write(MIN);
-      right.write(MAX);
+      //left.write(MIN);
+      //right.write(MAX);
+      drive.drive(-100);
       while (Serial.available() == 0) {
         Serial.println(Serial.available());
         Serial.println("Driving backwards");
@@ -94,16 +100,18 @@ void loop() {
     }
     else if (incoming == 'd') {
 
-      left.write(MAX);
-      right.write(MAX);
+      //left.write(MAX);
+      //right.write(MAX);
+      drive.centerTurn(-100);
       while (Serial.available() == 0) {
         Serial.println(Serial.available());
         Serial.println("Turning right");
         delay(15);
       }
     } else {
-      left.write(MID);
-      right.write(MID);
+      //left.write(MID);
+      //right.write(MID);
+      drive.halt();
       while (Serial.available() == 0) {
         Serial.println(Serial.available());
         delay(15);
