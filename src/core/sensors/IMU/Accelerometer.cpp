@@ -6,14 +6,14 @@
 #include "../IMU.h"
 #include "Accelerometer.h"
 
-// Adapted from the Adafruit LSM303 and the Adafruit Unified Sensor librarys
+// Adapted from the Adafruit LSM303 and the Adafruit Unified Sensor libraries
 
 //I2C Address
 #define LSM303_ADDRESS_ACCEL    (0x32 >> 1)     // 0011001x
 
 // Constants here to avoid pollution
 #define GRAVITY_STANDARD        9.80665F
-#define _LSM303ACCEL_MG_LSB     0.001F          // 1, 2, 4 or 12 mg per lsb
+//#define _LSM303ACCEL_MG_LSB     0.001F          // 1, 2, 4 or 12 mg per lsb
 
 namespace Rover {
 
@@ -62,6 +62,9 @@ void IMU::Accelerometer::read()
  ***************************************************************************/
 
 IMU::Accelerometer::Accelerometer(){
+    // TODO: actually look up the LSB values
+    accel_LSB = 0.001F;
+
     // Clear the raw accel data
     raw.x = 0;
     raw.y = 0;
@@ -166,9 +169,9 @@ bool IMU::Accelerometer::getEvent(SensorVec & event) {
   read();
 
   event.timestamp = millis();
-  event.x = (float)raw.x * _LSM303ACCEL_MG_LSB * GRAVITY_STANDARD;
-  event.y = (float)raw.y * _LSM303ACCEL_MG_LSB * GRAVITY_STANDARD;
-  event.z = (float)raw.z * _LSM303ACCEL_MG_LSB * GRAVITY_STANDARD;
+  event.x = (float)raw.x * accel_LSB * GRAVITY_STANDARD;
+  event.y = (float)raw.y * accel_LSB * GRAVITY_STANDARD;
+  event.z = (float)raw.z * accel_LSB * GRAVITY_STANDARD;
 
   return true;
 }
