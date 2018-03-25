@@ -65,6 +65,14 @@ int16_t IMU::readS16(byte address, byte reg)
 }
 
 IMU::IMU(){
+    robotPos.x = 0;
+    robotPos.y = 0;
+    robotPos.z = 0;
+
+    robotRot.roll = 0;
+    robotRot.pitch = 0;
+    robotRot.heading = 0;
+
     accelerometer = new Accelerometer();
     magnetometer = new Magnetometer();
     gyroscope = new Gyroscope();
@@ -76,6 +84,17 @@ IMU::~IMU(){
     delete magnetometer;
     delete gyroscope;
     delete barometer;
+}
+
+//Attempt to begin everything that is not yet active.
+//returns true if everything is started, false otherwise.
+bool IMU::begin(){
+    bool success = true;
+    if (!accelerometer->active()) success = (accelerometer->begin()) ? success : false;
+    if (!magnetometer->active()) success = (magnetometer->begin()) ? success : false;
+    if (!gyroscope->active()) success = (gyroscope->begin()) ? success : false;
+    if (!barometer->active()) success = (barometer->begin()) ? success : false;
+    return success;
 }
 
 }

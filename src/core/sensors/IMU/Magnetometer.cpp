@@ -69,7 +69,10 @@ IMU::Magnetometer::Magnetometer() {
     _lsm303Mag_Gauss_LSB_XY = 1100.0F;
     _lsm303Mag_Gauss_LSB_Z  = 980.0F;
 
+    gain = GAIN_1_3;
+
     autoRangeEnabled = false;
+    begun = false;
 
     // Clear the raw mag data
     raw.x = 0;
@@ -105,7 +108,7 @@ bool IMU::Magnetometer::begin()
     // Set the gain to a known level
     setMagGain(GAIN_1_3);
 
-    return true;
+    return begun = true;
 }
 
 /**************************************************************************/

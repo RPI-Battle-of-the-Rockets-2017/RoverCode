@@ -30,6 +30,8 @@ public:
 
     Gyroscope();
 
+    bool active() const { return begun; };
+
     bool begin(GyroRange rng = RANGE_250DPS);
     void enableAutoRange(bool enabled);
     bool getEvent(SensorVec&);
@@ -71,7 +73,7 @@ private:
     };
 
     GyroRange range;
-    bool autoRangeEnabled;
+    bool autoRangeEnabled, begun;
 
     inline void write8(byte reg, byte value);
     inline byte read8(byte reg);

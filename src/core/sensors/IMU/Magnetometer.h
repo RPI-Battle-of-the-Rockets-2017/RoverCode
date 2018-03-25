@@ -43,7 +43,9 @@ public:
     //Constructor
     Magnetometer();
 
-    bool begin(void);
+    bool active() const { return begun; };
+
+    bool begin();
     void enableAutoRange(bool enable);
     void setMagGain(MagGain gain);
     void setMagRate(MagRate rate);
@@ -74,6 +76,7 @@ private:
     float _lsm303Mag_Gauss_LSB_Z;   // Varies with gain
     bool autoRangeEnabled;
     MagGain gain;
+    bool begun;
 
     inline void write8(byte reg, byte value);
     inline byte read8(byte reg);

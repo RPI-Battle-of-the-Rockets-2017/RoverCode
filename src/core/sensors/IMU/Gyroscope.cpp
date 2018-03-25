@@ -33,6 +33,7 @@ byte IMU::Gyroscope::read8(byte reg){
 
 IMU::Gyroscope::Gyroscope() {
     autoRangeEnabled = false;
+    begun = false;
 
     // Clear the raw gyro data
     raw.x = 0;
@@ -149,7 +150,7 @@ bool IMU::Gyroscope::begin(GyroRange rng){
   /* Nothing to do ... keep default values */
   /* ------------------------------------------------------------------ */
 
-  return true;
+  return begun = true;
 }
 
 /**************************************************************************/

@@ -22,7 +22,9 @@ public:
         ULTRAHIGHRES           = 3
     };
 
-    //Adafruit_BMP085_Unified();
+    Barometer();
+
+    bool active() const { return begun; };
 
     bool begin(BMPModes mode = ULTRAHIGHRES);
     float getAltitude(float seaLevel);
@@ -72,6 +74,7 @@ private:
 
     BMPCalibData BMPcoeffs;   // Last read accelerometer data will be available here
     uint8_t BMPMode;
+    bool begun;
 
     inline void writeCommand(byte reg, byte value);
     inline byte read8(byte reg);

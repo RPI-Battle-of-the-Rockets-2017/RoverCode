@@ -22,6 +22,8 @@ public:
     //Constructor
     Accelerometer();
 
+    bool active() const { return begun; };
+
     bool begin();
     //Sleep settings for launch
     bool setSleepSettings();
@@ -68,6 +70,7 @@ private:
     };
 
     float accel_LSB;
+    bool begun;
 
     inline void write8(byte reg, byte value);
     inline byte read8(byte reg);

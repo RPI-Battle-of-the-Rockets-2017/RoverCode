@@ -65,6 +65,8 @@ IMU::Accelerometer::Accelerometer(){
     // TODO: actually look up the LSB values
     accel_LSB = 0.001F;
 
+    begun = false;
+
     // Clear the raw accel data
     raw.x = 0;
     raw.y = 0;
@@ -96,7 +98,7 @@ bool IMU::Accelerometer::begin()
     return false;
   }
 
-  return true;
+  return begun = true;
 }
 
 /**************************************************************************/

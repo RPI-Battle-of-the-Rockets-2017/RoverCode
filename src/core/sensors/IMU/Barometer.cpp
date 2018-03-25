@@ -183,12 +183,12 @@ inline float IMU::Barometer::getPressurekPa()
 }
 
 /***************************************************************************
- CONSTRUCTOR (Useless?)
+ CONSTRUCTOR (Useless?) - (NOPE!)
  ***************************************************************************/
 
-/*IMU::Barometer::Barometer(){
-
-}*/
+IMU::Barometer::Barometer(){
+    begun = false;
+}
 
 /***************************************************************************
  PUBLIC FUNCTIONS
@@ -223,7 +223,7 @@ bool IMU::Barometer::begin(BMPModes mode)
   /* Coefficients need to be read once */
   readCoefficients();
 
-  return true;
+  return begun = true;
 }
 
 /**************************************************************************/
