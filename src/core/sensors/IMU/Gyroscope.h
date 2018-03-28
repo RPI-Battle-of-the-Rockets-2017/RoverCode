@@ -35,6 +35,8 @@ public:
     bool begin(GyroRange rng = RANGE_250DPS);
     void enableAutoRange(bool enabled);
     bool getEvent(SensorVec&);
+	bool setSleepSettings();
+	bool setNormalSettings();
     //If needed, implement max_value and min_value getters
     //Refer to adafruit library to see relevant conversions.
 

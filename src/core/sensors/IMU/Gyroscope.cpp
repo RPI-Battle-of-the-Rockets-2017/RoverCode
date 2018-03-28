@@ -283,4 +283,24 @@ bool IMU::Gyroscope::getEvent(SensorVec& event)
   return true;
 }
 
+bool IMU::Gyroscope::setSleepSettings()
+{
+    // enables low power mode
+    write8(CTRL_REG1, 0xF8);
+    // Verify register set properly
+    if (read8(CTRL_REG1) != 0xF8) return false;
+
+    return true;
+}
+
+bool IMU::Gyroscope::setNormalSettings()
+{
+    // enables all axes
+    write8(CTRL_REG1, 0xF7);
+    // Verify register set properly
+    if (read8(CTRL_REG1) != 0xF7) return false;
+
+    return true;
+}
+
 }

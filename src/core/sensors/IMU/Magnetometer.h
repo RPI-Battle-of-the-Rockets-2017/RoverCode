@@ -50,6 +50,8 @@ public:
     void setMagGain(MagGain gain);
     void setMagRate(MagRate rate);
     bool getEvent(SensorVec&);
+	bool setSleepSettings();
+	bool setNormalSettings();
 
     MagData raw;
 private:

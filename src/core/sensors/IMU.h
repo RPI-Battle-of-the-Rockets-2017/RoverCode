@@ -71,6 +71,9 @@ public:
     //Measured with 0 at magnetic east (think x axis) and increasing counter clockwise.
     //Range is 0 - 2pi
     float getHeading() const { return robotRot.heading; };
+	
+	bool setSleepSettings();
+	bool setNormalSettings();
 
     Accelerometer* accelerometer;
     Magnetometer* magnetometer;

@@ -29,6 +29,7 @@ public:
     bool begin(BMPModes mode = ULTRAHIGHRES);
     float getAltitude(float seaLevel);
     float getSeaLevel(float altitude);
+	bool setSleepSettings();
 
 private:
     //Register Values

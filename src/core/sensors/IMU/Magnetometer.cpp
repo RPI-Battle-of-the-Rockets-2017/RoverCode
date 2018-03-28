@@ -279,4 +279,35 @@ bool IMU::Magnetometer::getEvent(SensorVec& event) {
 	return true;
 }
 
+bool IMU::Magnetometer::setSleepSettings()
+{
+    // enables low power mode
+    write8(CRA_REG_M, 0x00);
+    // Verify register set properly
+    if (read8(CRA_REG_M) != 0x00) return false;
+	
+	// set sleep mode
+    write8(MR_REG_M, 0x02);
+    // Verify register set properly
+    if (read8(MR_REG_M) != 0x02) return false;
+
+    return true;
+}
+
+bool IMU::Magnetometer::setNormalSettings()
+{
+	
+	// wake up magnetometer
+    write8(MR_REG_M, 0x00);
+    // Verify register set properly
+    if (read8(MR_REG_M) != 0x00) return false;
+	
+    // increases resolution too 220Hz
+    write8(CRA_REG_M, 0x1C);
+    // Verify register set properly
+    if (read8(CRA_REG_M) != 0x1C) return false;
+
+    return true;
+}
+
 }

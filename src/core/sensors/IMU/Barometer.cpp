@@ -261,7 +261,17 @@ float IMU::Barometer::getSeaLevel(float altitude)
   // at high altitude.  See this thread for more information:
   //  http://forums.adafruit.com/viewtopic.php?f=22&t=58064
 
-  return (getPressurekPa() / 100.0F) / pow(1.0 - (altitude/44330.0), 5.255);
+  return (getPressurekPa() / 100.0F) / pow(1.0 - (altitude/44330.0), 5.255)*3.28084;	//adjusted to return feet since that's what we use
+}
+
+bool IMU::Barometer::setSleepSettings()
+{
+    // Full settings
+    writeCommand(CONTROL, 0xF4);
+    // Verify register set properly
+    if (read8(CONTROL) != 0x34) return false;
+
+    return true;
 }
 
 

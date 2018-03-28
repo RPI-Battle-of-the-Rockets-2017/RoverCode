@@ -97,4 +97,16 @@ bool IMU::begin(){
     return success;
 }
 
+bool IMU::setSleepSettings(){
+	if(!accelerometer->setSleepSettings()||!magnetometer->setSleepSettings()||!gyroscope->setSleepSettings()||!barometer->setSleepSettings())
+		return false;
+	return true;
+}
+
+bool IMU::setNormalSettings(){
+	if(!accelerometer->setNormalSettings()||!magnetometer->setNormalSettings()||!gyroscope->setNormalSettings())
+		return false;
+	return true;
+}
+
 }
