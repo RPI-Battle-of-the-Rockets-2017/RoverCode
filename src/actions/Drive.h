@@ -7,8 +7,8 @@
 namespace Rover {
 	class Drive {
 	public:
-		Drive(int serv1, int serv2, IMU* nimu, float dHeading, bool rIsReversed = true) : rightServReversed(rIsReversed) {
-			s1 = serv1; s2 = serv2; imu = nimu; desiredHeading = dHeading;
+		Drive(int serv1, int serv2, IMU* nimu, bool rIsReversed = true) : rightServReversed(rIsReversed) {
+			s1 = serv1; s2 = serv2; imu = nimu; desiredHeading = 0;
 		}
 
 		void attach(){
