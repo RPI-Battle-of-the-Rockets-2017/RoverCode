@@ -2,11 +2,12 @@
 #define ROVER_DRIVE_H
 
 #include <Servo.h>
+#include "..\core\sensors\IMU.h" //For heading from IMU
 
 namespace Rover {
 	class Drive {
 	public:
-		Drive(int serv1, int serv2, bool rIsReversed = true, IMU* nimu, float dHeading) : rightServReversed(rIsReversed) {
+		Drive(int serv1, int serv2, IMU* nimu, float dHeading, bool rIsReversed = true) : rightServReversed(rIsReversed) {
 			s1 = serv1; s2 = serv2; imu = nimu; desiredHeading = dHeading;
 		}
 

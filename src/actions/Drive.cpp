@@ -1,15 +1,12 @@
 #include "Drive.h"
-#include "..\core\sensors\IMU.h" //For heading from IMU
-#include <cmath>//for Pi
-#define _USE_MATH_DEFINES
 //NOTE: motor is used when describing methods instead of servo/continuous servo
 //		change the comments if it is a necessary thing to do
 
 //constant values
 #define STOP_VAL 90 //center value / value that stops the motor
 #define SPEED_CALIBRATION ((150 - 90) / 100.0) // (max value - stopping value) / (half of total speed range wanted, i.e. -100 to 100)
-#define BEARING_CALIBRATION = 0.06 //Sets the tolerance range (approximately 1% of 2 PI)
-#define PI_VAL = M_PI //change M_PI depending on which compiler used, this is what works in Visual Studio
+#define BEARING_CALIBRATION  0.06 //Sets the tolerance range (approximately 1% of 2 PI)
+#define PI_VAL  3.14159265 //PI
 
 namespace Rover {
 	void Drive::setHeading(float nHeading) {//set a new desired Heading
