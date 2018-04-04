@@ -2,6 +2,7 @@
 #define ROVER_SDUTILS_H
 
 #include <SD.h>
+#include "../utilities/Telemetry.h"
 #include "../sensors/Camera.h"
 
 /**
@@ -18,7 +19,7 @@ namespace Rover {
 class SDUtils {
   public:
     SDUtils(int chipSelect = 53);
-    void writeImage(Camera &cam);
+    void writeImage(Camera &cam, Telemetry &tel);
     File* getFile() { return &currFile; };
 
   private:
