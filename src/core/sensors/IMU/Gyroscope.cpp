@@ -274,8 +274,7 @@ bool IMU::Gyroscope::getEvent(SensorVec& event)
       event.z *= GYRO_SENSITIVITY_2000DPS;
       break;
   }
-
-  /* Convert values to rad/s */
+/* Convert values to rad/s */
   event.x *= SENSORS_DPS_TO_RADS;
   event.y *= SENSORS_DPS_TO_RADS;
   event.z *= SENSORS_DPS_TO_RADS;
@@ -286,19 +285,19 @@ bool IMU::Gyroscope::getEvent(SensorVec& event)
 bool IMU::Gyroscope::setSleepSettings()
 {
     // enables low power mode
-    write8(CTRL_REG1, 0xF8);
+    write8(CTRL_REG1, 0xB0);
     // Verify register set properly
-    if (read8(CTRL_REG1) != 0xF8) return false;
+    if (read8(CTRL_REG1) != 0xB0) return false;
 
     return true;
 }
 
 bool IMU::Gyroscope::setNormalSettings()
 {
-    // enables all axes
-    write8(CTRL_REG1, 0xF7);
+    // enables all axes, sets data rate to 380Hz
+    write8(CTRL_REG1, 0xBF);
     // Verify register set properly
-    if (read8(CTRL_REG1) != 0xF7) return false;
+    if (read8(CTRL_REG1) != 0xBF) return false;
 
     return true;
 }

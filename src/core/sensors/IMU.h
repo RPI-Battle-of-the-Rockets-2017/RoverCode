@@ -32,11 +32,20 @@ private:
 
     static uint16_t read16(byte address, byte reg);
     static int16_t readS16(byte address, byte reg);
+	
+	void readAccelerometer();
+	void readGyroscope();
 
     //The stored robot states as calculated in this class...
     //Position and orientation
-    Vector robotPos;
-    Vector robotRot;
+	
+	float accel_x_offset;
+	float accel_y_offset;
+	float accel_z_offset;
+	float gyro_x_offset;
+	float gyro_y_offset;
+	float gyro_z_offset;
+	
 
 public:
     typedef struct{
@@ -67,18 +76,41 @@ public:
     //returns true if everything is started, false otherwise.
     bool begin();
 
-    //Get's the current heading of the robot in radians
+    //Gets the current heading of the robot in radians
     //Measured with 0 at magnetic east (think x axis) and increasing counter clockwise.
     //Range is 0 - 2pi
     float getHeading() const { return robotRot.heading; };
+	float getPosition() const { return position; };
 	
 	bool setSleepSettings();
 	bool setNormalSettings();
+	
+	void updateOrientation();
+	void resetRates();
+	void resetOrientation();
 
     Accelerometer* accelerometer;
     Magnetometer* magnetometer;
     Gyroscope* gyroscope;
     Barometer* barometer;
+	
+	unsigned char sensor_counter;
+	
+	SensorVec vec;
+	
+	
+	
+	Vector robotRot;
+	Vector robotRotRates;
+	Vector robotPrevRotRates;
+	Vector rawAccel;
+	Vector rawGyro;
+	
+	float position;
+	float velocity;
+	float acceleration;
+	float prevVelocity;
+	float prevAcceleration;
 };
 
 }

@@ -302,7 +302,7 @@ bool IMU::Magnetometer::setNormalSettings()
     // Verify register set properly
     if (read8(MR_REG_M) != 0x00) return false;
 	
-    // increases resolution too 220Hz
+    // increases data rate to 220Hz
     write8(CRA_REG_M, 0x1C);
     // Verify register set properly
     if (read8(CRA_REG_M) != 0x1C) return false;
