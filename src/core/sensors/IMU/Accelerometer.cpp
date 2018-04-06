@@ -134,9 +134,9 @@ bool IMU::Accelerometer::setSleepSettings()
     if (read8(INT1_CFG_A) != 0x2A) return false;
 
     //Sets interrupt threshold to 2.5g
-    write8(INT1_THS_A, 0x50);
+    write8(INT1_THS_A, 0x30);	//FOR THE LOVE OF GOD, CHANGE THIS BACK TO 0x50
     // Verify register set properly
-    if (read8(INT1_THS_A) != 0x50) return false;
+    if (read8(INT1_THS_A) != 0x30) return false;
 
     //Sets minimum duration for interrupt trigger to 100ms (5/50)
     write8(INT1_DURATION_A, 0x19);
