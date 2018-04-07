@@ -17,18 +17,26 @@ public:
     CameraServo(int servoPin, int sensorPin, bool reversed = false)
         : servoPin(servoPin), sensorPin(sensorPin), reversed(reversed), position(-1) {};
 
+    //Attach or detach the servo to the passed in pin.
     void attach();
+    void detach();
 
+    //Get the position of camera servo
     short getPosition() const { return position; };
 
+    //make the current position of the servo 0, unless it's -1, where it'll just zero the position.
     void resetPosition();
 
+    //Rotate the camera servo to it's zero position
     void zeroPosition();
 
-    void moveToPosition(short position);
+    //Move the camera servo to the position passed in. It is modulo'd by 4 to keep it in range.
+    void moveToPosition(unsigned short position);
 
+    //Move the camera to the next incremental position, wrapping 4 around to 0
     void nextPosition() { moveToPosition(position++); };
 
+    //Publicly accesible reversed bool
     const bool reversed;
 private:
     const int servoPin, sensorPin;
