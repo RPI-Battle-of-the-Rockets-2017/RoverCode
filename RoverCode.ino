@@ -7,28 +7,39 @@
 #include "src/core/components/NichromeCutter.h"
 #include "src/core/sensors/Camera.h"
 #include "src/core/sensors/IMU.h"
+#include "src/core/sensors/Adafruit_GPS.h"
 #include "src/actions/Drive.h"
+#include "src/core/utilities/Telemetry.h"
+#include "src/core/components/SDUtils.h"
 #include <avr/sleep.h>
 
+#define GPSSerial Serial1
 
-//Rover::Camera cam(&Serial1);
+
+Rover::Camera cam(&Serial2);
+Rover::Telemetry tele(&Serial3, &Serial);
 
 Rover::IMU imu;
-Rover::Drive drive(3, 5);
+Rover::Drive drive(3, 5, &imu, true);
+Rover::NichromeCutter nc1(1);
+Rover::NichromeCutter nc2(2);
+Rover::NichromeCutter nc3(3);
+//Adafruit_GPS GPS(&GPSSerial);
+
 
 unsigned char state = 0;
 
-unsigned char accel_gyro_counter = 0;
-unsigned char magnetometer_counter = 0;
 unsigned int override_counter = 0;
+unsigned int tele_counter=0;
 
 byte adcsra_save=0;
 float slp;
 float altitude;
 float landing_check_array [5];
 
-float ground_altitude = 0/3.28084; //get a real value for this
-
+float ground_altitude = 273; //get a real value for this
+int speed = 50; //decided from testing
+int nichrome_time = 2000;
 
 void setup() {
   // put your setup code here, to run once:
@@ -36,17 +47,40 @@ void setup() {
   adcsra_save=ADCSRA; //save ADC settings
   Serial.begin(38400);
   drive.attach();
+  drive.halt();
+  nc1.attach();
+  nc2.attach();
+  nc3.attach();
+
+  tele.pack_ser.setPacketHandler([](const uint8_t *buffer, size_t size) {
+    tele.processTelem(buffer, size);
+  });
+
+  cam.begin();
+  cam.setImageSize(VC0706_640X480);
+  
+  Rover::SDUtils sd;
+  /*
+  cam.takePicture();
+  sd.writeImage(cam, tele);
+  */
+
+  /*GPS.begin(9600);
+  GPS.sendCommand("$PGCMD,33,0*6D"); //So antenna doesn't act up
+  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY);
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ); // 1 Hz update rate*/
 
   imu.begin();
   while(!imu.setSleepSettings());
   pinMode(13, OUTPUT);
   digitalWrite(13, LOW);
-  digitalWrite(2, HIGH);
-  slp = imu.barometer->getSeaLevel(ground_altitude);
+  pinMode(2, INPUT);
+  slp = imu.barometer->getSeaLevel(ground_altitude/3.28084);
   while(state==0){  //pre-launch state
     Serial.println("0");
     test++; //SERIOUSLY, TAKE THIS OUT
     ADCSRA = adcsra_save;  //reset ADC
+    while(digitalRead(2) == LOW);
     altitude = imu.barometer->getAltitude(slp);
     delay(974);
     if(imu.barometer->getAltitude(slp) - altitude >= 100 || test ==3) //check for 100 ft. difference in 1 second
@@ -57,21 +91,30 @@ void setup() {
   while(!imu.setNormalSettings());
   override_counter = 0;
   timer_init();
+  Serial.println("1");
   while(state==1){  //ascending state
-    Serial.println("1");
     altitude = imu.barometer->getAltitude(slp);
-    if(altitude-ground_altitude >= 800||override_counter>=13600)//above 800ft. or override
+    if(altitude-ground_altitude >= 800||override_counter>=10880)//above 800ft. or override
       state++;
+    if(tele_counter>=320){
+      tele_counter=0;
+      tele.sendBaroHeight(altitude);
+    }
+    tele.update();
   }
+  Serial.println("2");
   while(state==2){  //descending state
-    Serial.println("2");
     altitude = imu.barometer->getAltitude(slp);
-    if(altitude-ground_altitude <= 400||override_counter>=13600)// below 400ft. or override
+    if(altitude-ground_altitude <= 400||override_counter>=10880)// below 400ft. or override
       state++;
+    if(tele_counter>=320){
+      tele_counter=0;
+      tele.sendBaroHeight(altitude);
+    }
+    tele.update();
   }
-  Serial.println("Nichrome on");  //replace these 3 lines with real nichrome code
-  delay(1000);
-  Serial.println("Nichrome off");
+  nc1.activate(nichrome_time);
+  Serial.println("3");
   for(int i=0; i<5; i++){
     altitude = imu.barometer->getAltitude(slp);
     landing_check_array[i] = altitude; //initialize array
@@ -79,8 +122,15 @@ void setup() {
   }
   while(state==3){
     landing_check();  //wait for landing detection
+    if(tele_counter>=320){
+      tele_counter=0;
+      tele.sendBaroHeight(altitude);
+    }
+    tele.update();
   }
   Serial.println("4");
+  nc2.activate(nichrome_time);
+  //camera stuff
   /*Serial.begin(38400);
   if (!cam.begin()) {
     Serial.printlnln("No camera found");
@@ -95,31 +145,43 @@ void setup() {
   }
 
   sd.writeImage(cam);*/
-  
+  for(int i=0; i<10; i++){
+    forward(1);
+    readGPS();
+    tele.sendBaroHeight(altitude);
+  }
+  nc3.activate(nichrome_time);
+  turn();
+  readGPS();
+  tele.sendBaroHeight(altitude);
+  for(int i=0; i<10; i++){
+    forward(1);
+    readGPS();
+    tele.sendBaroHeight(altitude);
+  }
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  readGPS();
+  tele.sendBaroHeight(altitude);
+  tele.update();
 }
 
 void timer_init(){
-  noInterrupts();           // disable all interrupts
+noInterrupts();           // disable all interrupts
   TCCR3A = 0;
   TCCR3B = 0;
   TCNT3  = 0;
-
-  OCR3B = 40000;            // compare match register 16MHz/400Hz
-  TCCR3B |= 0x08;   // CTC mode
-  TCCR3B |= 0x01;    // 1 prescaler 
-  TIMSK3 |= 0x04;  // enable timer compare interrupt
+  TCCR3B |= 0x01;   // Overflow mode
+  TIMSK3 |= 0x01;  // enable timer overflow interrupt
   interrupts();             // enable all interrupts
 }
 
-ISR(TIMER3_COMPB_vect)          // timer compare interrupt service routine
+ISR(TIMER3_OVF_vect)          // timer compare interrupt service routine
 {
-  accel_gyro_counter++;
-  magnetometer_counter++;
+  imu.sensor_counter++;
   override_counter++;
+  TCNT3 = 15535;  //set timer for 320Hz
 }
 
 void wake ()
@@ -156,7 +218,6 @@ void sleep(){
 
 
 void landing_check(){
-  Serial.println("3");
   if(landing_check_array[0] - landing_check_array[4] <= 20)  //difference between current altitude and altitude 5 seconds ago
     state++;
   else{
@@ -169,4 +230,34 @@ void landing_check(){
     delay(974);
   }
 }
+ void forward(float distance){
+    imu.resetRates();
+    float initial = imu.getPosition();
+    while(imu.getPosition() - initial < distance){
+      drive.drive(speed); //lol
+      imu.updateOrientation();
+      tele.update();
+    }
+    drive.halt();
+ }
+
+ void turn(){
+    imu.resetRates();
+    while(imu.getHeading()>-1*PI/2){
+      drive.pivotTurn(speed, -1);
+      imu.updateOrientation();
+      tele.update();
+    }
+    drive.halt();
+    imu.resetOrientation();
+ }
+
+void readGPS(){
+  while(!GPS.newNMEAreceived()) //Keep reading characters in this loop until a good NMEA sentence is received
+    c=GPS.read(); //read a character from the GPS
+  GPS.parse(GPS.lastNMEA());  //Once you get a good NMEA, parse it
+ }
+ }
+
+
 

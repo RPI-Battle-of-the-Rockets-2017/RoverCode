@@ -8,7 +8,7 @@ SDUtils::SDUtils(int chipSelect) {
     }
 }
 
-void SDUtils::writeImage(Camera &cam) {
+void SDUtils::writeImage(Camera &cam, Telemetry &tel) {
     char filename[13];
     strcpy(filename, "DOOR00.JPG");
     for (int i = 0; i < 100; i++) {
@@ -22,6 +22,7 @@ void SDUtils::writeImage(Camera &cam) {
     }
 
     currFile = SD.open(filename, FILE_WRITE);
+    tel.initiateImage();
 
     uint16_t jpglen = cam.frameLength();
     Serial.println(jpglen);
@@ -30,9 +31,11 @@ void SDUtils::writeImage(Camera &cam) {
         uint8_t bytesToRead = min(64, jpglen);
         buffer = cam.readPicture(bytesToRead);
         currFile.write(buffer, bytesToRead);
+        while(tel.sendImage(buffer, bytesToRead));
         jpglen -= bytesToRead;
     }
     currFile.close();
+    tel.endImage();
 
     Serial.println("Write complete");
     if (!SD.exists(filename)) {

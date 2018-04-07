@@ -65,13 +65,32 @@ int16_t IMU::readS16(byte address, byte reg)
 }
 
 IMU::IMU(){
-    robotPos.x = 0;
-    robotPos.y = 0;
-    robotPos.z = 0;
+    position = 0;
+	velocity = 0;
+	acceleration = 0;
+	prevVelocity = 0;
+	prevAcceleration = 0;
 
     robotRot.roll = 0;
     robotRot.pitch = 0;
     robotRot.heading = 0;
+	
+	robotRotRates.roll = 0;
+    robotRotRates.pitch = 0;
+    robotRotRates.heading = 0;
+	
+	robotPrevRotRates.roll = 0;
+    robotPrevRotRates.pitch = 0;
+    robotPrevRotRates.heading = 0;
+	
+	sensor_counter = 0;
+	
+	accel_x_offset = 0;
+	accel_y_offset = 0;
+	accel_z_offset = 0;
+	gyro_x_offset = 0;
+	gyro_y_offset = 0;
+	gyro_z_offset = 0;
 
     accelerometer = new Accelerometer();
     magnetometer = new Magnetometer();
@@ -98,7 +117,7 @@ bool IMU::begin(){
 }
 
 bool IMU::setSleepSettings(){
-	if(!accelerometer->setSleepSettings()||!magnetometer->setSleepSettings()||!gyroscope->setSleepSettings()||!barometer->setSleepSettings())
+	if(!accelerometer->setSleepSettings()||!magnetometer->setSleepSettings()||!gyroscope->setSleepSettings())
 		return false;
 	return true;
 }
@@ -107,6 +126,72 @@ bool IMU::setNormalSettings(){
 	if(!accelerometer->setNormalSettings()||!magnetometer->setNormalSettings()||!gyroscope->setNormalSettings())
 		return false;
 	return true;
+}
+
+void IMU::readAccelerometer(){
+	accelerometer->getEvent(vec);
+	rawAccel.x = vec.x*3.25786+.447418;
+	rawAccel.y = vec.y*3.15389+.395669;
+	rawAccel.z = vec.z*3.28799+.44188;
+}
+
+void IMU::readGyroscope(){
+	gyroscope->getEvent(vec);
+	rawGyro.pitch = vec.x+.93508;
+	rawGyro.roll = vec.y+2.94101;
+	rawGyro.heading = vec.z-.32851;
+}
+
+
+void IMU::updateOrientation(){
+	if(sensor_counter>=1){
+		sensor_counter=0;
+		readAccelerometer();
+		readGyroscope();
+		prevAcceleration = acceleration;
+		prevVelocity = velocity;
+		robotPrevRotRates.heading = robotRotRates.heading;
+		acceleration = (rawAccel.y-accel_y_offset)/cos(robotRotRates.pitch);
+		velocity = prevVelocity+prevAcceleration/320.0f+(acceleration-prevAcceleration)/640.0f;
+		position += prevVelocity/320.0f+(velocity-prevVelocity)/640.0f;
+		robotRotRates.heading = (rawGyro.heading-gyro_z_offset)/cos(robotRotRates.pitch);
+		robotRot.heading += robotPrevRotRates.heading/320.0f + (robotRotRates.heading - robotPrevRotRates.heading)/640.0f;
+	}
+}
+
+void IMU::resetRates(){
+	velocity=0;
+	acceleration=0;
+	prevVelocity=0;
+	prevAcceleration=0;
+	robotRotRates.roll=0;
+	robotRotRates.pitch=0;
+	robotRotRates.heading=0;
+	robotPrevRotRates.roll=0;
+	robotPrevRotRates.pitch=0;
+	robotPrevRotRates.heading=0;
+	float sumAccelX=0;
+	float sumAccelY=0;
+	float sumAccelZ=0;
+	float sumGyroZ=0;
+	delay(1000);
+	for(int i=0; i<100; i++){
+		readAccelerometer();
+		readGyroscope();
+		sumAccelX+=rawAccel.x;
+		sumAccelY+=rawAccel.y;
+		sumAccelZ+=rawAccel.z;
+		sumGyroZ+=rawGyro.heading;
+		delay(10);
+	}
+	robotRot.pitch = asin(-1*sumAccelY/sqrt(pow(sumAccelX,2)+pow(sumAccelY,2)+pow(sumAccelZ,2)));
+	accel_y_offset = sumAccelY/100;
+	gyro_z_offset = sumGyroZ/100;
+}
+
+void IMU::resetOrientation(){
+	position=0;
+	robotRot.heading=0;
 }
 
 }
