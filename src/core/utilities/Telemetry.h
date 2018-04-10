@@ -23,12 +23,6 @@ enum MSG_TYPE{
     GPS = 5
 };
 
-enum IMAGE_MSG_RESULT {
-    WAITING = 0,
-    CORRECT = 1,
-    INCORRECT = 2
-};
-
 class Telemetry {
 public:
         Telemetry(HardwareSerial *ser, HardwareSerial *debug);
@@ -42,7 +36,7 @@ public:
         void establishComm();
 
         void initiateImage();
-        bool sendImage(uint8_t *buffer, uint8_t size);
+        void sendImage(uint8_t *buffer, uint8_t size);
         void endImage();
 private:
         void sendPacket(uint8_t *buffer, MSG_TYPE type, uint8_t len);
@@ -56,9 +50,6 @@ private:
         bool comms_established;
         bool message_confirmed;
         bool message_in_queue;
-
-        IMAGE_MSG_RESULT img_result = IMAGE_MSG_RESULT::WAITING;
-        uint8_t img_sent_size;
 
         long time_false;
         const static long LOOP_THRESHOLD = 100000;

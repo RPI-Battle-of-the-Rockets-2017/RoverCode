@@ -28,10 +28,11 @@ void SDUtils::writeImage(Camera &cam, Telemetry &tel) {
     Serial.println(jpglen);
     while (jpglen > 0) {
         uint8_t *buffer;
-        uint8_t bytesToRead = min(64, jpglen);
+        uint8_t bytesToRead = min(32, jpglen);
         buffer = cam.readPicture(bytesToRead);
         currFile.write(buffer, bytesToRead);
-        while(tel.sendImage(buffer, bytesToRead));
+        //while(tel.sendImage(buffer, bytesToRead));
+        tel.sendImage(buffer, bytesToRead);
         jpglen -= bytesToRead;
     }
     currFile.close();

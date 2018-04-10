@@ -47,20 +47,22 @@ def ProcessMessage(msg):
 
         elif msg_type == '\x01':
             print("Initiate image")
-            f = open('image' + image_num + '.jpg', 'w')
+            #f = open('image' + image_num + '.jpg', 'w')
+            print("Here1")
             ser.write(cobs.encode(sequence_num) + '\x00')
+            print("Here2")
 
         elif msg_type == '\x02':
+            print("Image Data")
             print(bytearray(decoded[4:]))
-            f.write(bytearray(decoded[4:]))
-            print(sequence_num + struct.pack('<B', length - 4))
-            ser.write(cobs.encode(sequence_num + struct.pack('<B', length - 4)) + '\x00')
+            #f.write(bytearray(decoded[4:]))
+            ser.write(cobs.encode(sequence_num) + '\x00')
 
         elif msg_type == '\x03':
             print("End image")
-            f.close();
-            im = Image.open('image' + image_num + '.jpg')
-            im.show()
+            #f.close();
+            #im = Image.open('image' + image_num + '.jpg')
+            #im.show()
             ser.write(cobs.encode(sequence_num) + '\x00')
             image_num += 1
 
