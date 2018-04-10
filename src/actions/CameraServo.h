@@ -24,13 +24,15 @@ public:
     void resetPosition();
 
     //Rotate the camera servo to it's zero position
-    void zeroPosition();
+    bool zeroPosition();
 
     //Move the camera servo to the position passed in. It is modulo'd by 4 to keep it in range.
-    void moveToPosition(unsigned short position);
+    //This returns a true if the function was performed unhindered, which means it returns false
+    //if there is a timeout that occurred.
+    bool moveToPosition(unsigned short position);
 
     //Move the camera to the next incremental position, wrapping 4 around to 0
-    void nextPosition() { moveToPosition(position++); };
+    bool nextPosition() { return moveToPosition(position++); };
 
     //Publicly accesible reversed bool
     const bool reversed;
