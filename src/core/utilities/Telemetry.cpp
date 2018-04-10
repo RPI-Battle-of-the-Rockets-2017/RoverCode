@@ -42,26 +42,26 @@ void Telemetry::initiateImage() {
         update();
     }
     sendPacket(0, MSG_TYPE::INITIATE_IMAGE, 0);
+    debug_ser->println("Sent packet");
     while (!message_confirmed) {
-        update();
-    }
-}
-
-bool Telemetry::sendImage(uint8_t *buffer, uint8_t size) {
-    img_sent_size = size;
-    sendPacket(buffer, MSG_TYPE::IMAGE, size);
-    while (img_result == IMAGE_MSG_RESULT::WAITING) {
         pack_ser.update();
     }
-    if (img_result == IMAGE_MSG_RESULT::CORRECT) {
-        return true;
-    } else {
-        return false;
+    debug_ser->println("Confirmed");
+}
+
+void Telemetry::sendImage(uint8_t *buffer, uint8_t size) {
+    sendPacket(buffer, MSG_TYPE::IMAGE, size);
+
+    while (!message_confirmed) {
+        pack_ser.update();
     }
 }
 
 void Telemetry::endImage() {
     sendPacket(0, MSG_TYPE::END_IMAGE, 0);
+    while (!message_confirmed) {
+        pack_ser.update();
+    }
 }
 
 void Telemetry::sendBaroHeight(int height) {
@@ -97,6 +97,7 @@ void Telemetry::sendGPSData(long latitude, long longitude)
 
 void Telemetry::processTelem(const uint8_t *buffer, uint16_t size) {
     //Size is 1 for normal confirmation
+    debug_ser->println("processing telem");
     if (size == 1) {
         if (buffer[0] == sequence_num) {
             sequence_num++;
@@ -105,20 +106,6 @@ void Telemetry::processTelem(const uint8_t *buffer, uint16_t size) {
             comms_established = true;
 
             //debug_ser->println("Confirmation");
-        }
-    } else if (size == 2) { // 2 for image confirmation
-        if (buffer[0] == sequence_num) {
-            debug_ser->println(buffer[1]);
-            uint8_t image_size = buffer[1];
-            if (image_size == img_sent_size) {
-                img_result = IMAGE_MSG_RESULT::CORRECT;
-            } else {
-                img_result = IMAGE_MSG_RESULT::INCORRECT;
-            }
-            sequence_num++;
-            message_confirmed = true;
-            time_false = 0;
-            comms_established = true;
         }
     }
 }

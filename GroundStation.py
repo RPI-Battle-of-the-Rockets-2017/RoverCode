@@ -1,3 +1,4 @@
+from __future__ import print_function
 import serial
 import time
 from cobs import cobs
@@ -6,6 +7,7 @@ import struct
 import argparse
 import io
 import time
+from PIL import Image
 
 ser = serial.Serial('COM17', 9600)
 msg = ''
@@ -45,20 +47,24 @@ def ProcessMessage(msg):
 
         elif msg_type == '\x01':
             print("Initiate image")
-            f = open('test.txt', 'w')
+            #f = open('image' + image_num + '.jpg', 'w')
+            print("Here1")
             ser.write(cobs.encode(sequence_num) + '\x00')
+            print("Here2")
 
         elif msg_type == '\x02':
-            print("Sending image")
+            print("Image Data")
             print(bytearray(decoded[4:]))
-            f.write(bytearray(decoded[4:]))
-            print(sequence_num + struct.pack('<B', length - 4))
-            ser.write(cobs.encode(sequence_num + struct.pack('<B', length - 4)) + '\x00')
+            #f.write(bytearray(decoded[4:]))
+            ser.write(cobs.encode(sequence_num) + '\x00')
 
         elif msg_type == '\x03':
             print("End image")
-            f.close();
+            #f.close();
+            #im = Image.open('image' + image_num + '.jpg')
+            #im.show()
             ser.write(cobs.encode(sequence_num) + '\x00')
+            image_num += 1
 
         elif msg_type == '\x04': #BARO
             print("Baro")
@@ -70,7 +76,12 @@ def ProcessMessage(msg):
             ser.write(cobs.encode(sequence_num) + '\x00')
 
         elif msg_type == '\x05': #GPS
-            print("GPS")
+            pos = struct.unpack("<ll", decoded[4:])
+            print("GPS:")
+            print("Lat: ", end='')
+            print(pos[0], end='')
+            print(" Long: ", end='')
+            print(pos[1])
             ser.write(cobs.encode(sequence_num) + '\x00')
 
 ser.reset_input_buffer()
