@@ -63,7 +63,7 @@ void IMU::Accelerometer::read()
 
 IMU::Accelerometer::Accelerometer(){
     // TODO: actually look up the LSB values
-    accel_LSB = 0.001F;
+    accel_LSB = 0.002F;
 
     begun = false;
 

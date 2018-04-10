@@ -13,18 +13,19 @@
 #include "src/core/components/SDUtils.h"
 #include <avr/sleep.h>
 
-#define GPSSerial Serial1
+#define GPSSerial Serial2
 
 
-Rover::Camera cam(&Serial2);
+Rover::Camera cam(&Serial1);
 Rover::Telemetry tele(&Serial3, &Serial);
 
 Rover::IMU imu;
 Rover::Drive drive(3, 5, &imu, true);
-Rover::NichromeCutter nc1(1);
-Rover::NichromeCutter nc2(2);
-Rover::NichromeCutter nc3(3);
-//Adafruit_GPS GPS(&GPSSerial);
+Rover::NichromeCutter nc1(5);
+Rover::NichromeCutter nc2(6);
+Rover::NichromeCutter nc3(7);
+Rover::NichromeCutter nc4(4);
+Adafruit_GPS GPS(&GPSSerial);
 
 
 unsigned char state = 0;
@@ -36,34 +37,34 @@ byte adcsra_save=0;
 float slp;
 float altitude;
 float landing_check_array [5];
+long lat;
+long lon;
+char c;
 
 float ground_altitude = 273; //get a real value for this
 int speed = 50; //decided from testing
-int nichrome_time = 2000;
+int nichrome_time = 5000;
 
 void setup() {
   // put your setup code here, to run once:
   unsigned char test = 0; //DO NOT LEAVE IN CODE, TESTING PURPOSES ONLY
   adcsra_save=ADCSRA; //save ADC settings
   Serial.begin(38400);
-  drive.attach();
-  drive.halt();
   nc1.attach();
   nc2.attach();
   nc3.attach();
+  nc4.attach();
 
   tele.pack_ser.setPacketHandler([](const uint8_t *buffer, size_t size) {
     tele.processTelem(buffer, size);
   });
 
   cam.begin();
-  cam.setImageSize(VC0706_640X480);
+  cam.setImageSize(VC0706_640x480);
   
   Rover::SDUtils sd;
-  /*
   cam.takePicture();
   sd.writeImage(cam, tele);
-  */
 
   /*GPS.begin(9600);
   GPS.sendCommand("$PGCMD,33,0*6D"); //So antenna doesn't act up
@@ -128,8 +129,11 @@ void setup() {
     }
     tele.update();
   }
+  drive.attach();
+  drive.halt();
   Serial.println("4");
   nc2.activate(nichrome_time);
+  nc3.activate(nichrome_time);
   //camera stuff
   /*Serial.begin(38400);
   if (!cam.begin()) {
@@ -148,22 +152,22 @@ void setup() {
   for(int i=0; i<10; i++){
     forward(1);
     readGPS();
-    tele.sendBaroHeight(altitude);
+    tele.sendGPSData(lat, lon);
   }
-  nc3.activate(nichrome_time);
+  nc4.activate(nichrome_time);
   turn();
   readGPS();
-  tele.sendBaroHeight(altitude);
+  tele.sendGPSData(lat, lon);
   for(int i=0; i<10; i++){
     forward(1);
     readGPS();
-    tele.sendBaroHeight(altitude);
+    tele.sendGPSData(lat, lon);
   }
 }
 
 void loop() {
   readGPS();
-  tele.sendBaroHeight(altitude);
+  tele.sendGPSData(lat, lon);
   tele.update();
 }
 
@@ -243,7 +247,7 @@ void landing_check(){
 
  void turn(){
     imu.resetRates();
-    while(imu.getHeading()>-1*PI/2){
+    while(imu.getHeading()>3*PI/2||imu.getHeading()<PI/2){
       drive.pivotTurn(speed, -1);
       imu.updateOrientation();
       tele.update();
@@ -256,8 +260,10 @@ void readGPS(){
   while(!GPS.newNMEAreceived()) //Keep reading characters in this loop until a good NMEA sentence is received
     c=GPS.read(); //read a character from the GPS
   GPS.parse(GPS.lastNMEA());  //Once you get a good NMEA, parse it
+  lat = GPS.latitude*100000;
+  lon = GPS.longitude*100000;
  }
- }
+ 
 
 
 

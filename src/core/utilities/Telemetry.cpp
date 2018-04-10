@@ -76,6 +76,25 @@ void Telemetry::sendBaroHeight(int height) {
     }
 }
 
+void Telemetry::sendGPSData(long latitude, long longitude)
+{
+    if (comms_established) {
+	debug_ser->print("HERE");
+
+        send_buf[0] = latitude & 0xFF;
+        send_buf[1] = (latitude >> 8) & 0xFF;
+        send_buf[2] = (latitude >> 16) & 0xFF;
+        send_buf[3] = (latitude >> 24) & 0xFF;
+
+        send_buf[4] = longitude & 0xFF;
+        send_buf[5] = (longitude >> 8) & 0xFF;
+        send_buf[6] = (longitude >> 16) & 0xFF;
+        send_buf[7] = (longitude >> 24) & 0xFF;
+
+        sendPacket(send_buf, MSG_TYPE::GPS, 2 * sizeof(long));
+    }
+}
+
 void Telemetry::processTelem(const uint8_t *buffer, uint16_t size) {
     //Size is 1 for normal confirmation
     if (size == 1) {

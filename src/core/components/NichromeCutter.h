@@ -10,7 +10,7 @@ public:
 		pin = pinNum;
 	}
 	void attach() {
-		pinMode(pin, INPUT);
+		pinMode(pin, OUTPUT);
 	}
 	void activate(int time) { //takes an input in milliseconds and activates the nichrome wire for that duration of time
 		digitalWrite(pin, HIGH);

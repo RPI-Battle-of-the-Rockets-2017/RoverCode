@@ -139,7 +139,7 @@ void IMU::readGyroscope(){
 	gyroscope->getEvent(vec);
 	rawGyro.pitch = vec.x+.93508;
 	rawGyro.roll = vec.y+2.94101;
-	rawGyro.heading = vec.z-.32851;
+	rawGyro.heading = (vec.z-.32851)*1.242;
 }
 
 
@@ -151,11 +151,19 @@ void IMU::updateOrientation(){
 		prevAcceleration = acceleration;
 		prevVelocity = velocity;
 		robotPrevRotRates.heading = robotRotRates.heading;
-		acceleration = (rawAccel.y-accel_y_offset)/cos(robotRotRates.pitch);
+		filter_sum-=filter[shifter];
+		filter[shifter] = (rawAccel.y-accel_y_offset)/cos(robotRot.pitch);
+		filter_sum+=filter[shifter];
+		shifter = (shifter + 1)%sample_size;
+		acceleration = filter_sum/sample_size;
 		velocity = prevVelocity+prevAcceleration/320.0f+(acceleration-prevAcceleration)/640.0f;
 		position += prevVelocity/320.0f+(velocity-prevVelocity)/640.0f;
-		robotRotRates.heading = (rawGyro.heading-gyro_z_offset)/cos(robotRotRates.pitch);
+		robotRotRates.heading = (rawGyro.heading-gyro_z_offset)/cos(robotRot.pitch);
 		robotRot.heading += robotPrevRotRates.heading/320.0f + (robotRotRates.heading - robotPrevRotRates.heading)/640.0f;
+		if(robotRot.heading>2*PI)
+			robotRot.heading-=2*PI;
+		if(robotRot.heading<0)
+			robotRot.heading+=2*PI;
 	}
 }
 
@@ -174,6 +182,10 @@ void IMU::resetRates(){
 	float sumAccelY=0;
 	float sumAccelZ=0;
 	float sumGyroZ=0;
+	shifter = 0;
+	filter_sum = 0;
+	for(int i=0; i<sample_size; i++)
+		filter[i]=0;
 	delay(1000);
 	for(int i=0; i<100; i++){
 		readAccelerometer();

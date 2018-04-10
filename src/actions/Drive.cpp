@@ -3,8 +3,8 @@
 //		change the comments if it is a necessary thing to do
 
 //constant values
-#define STOP_VAL 90 //center value / value that stops the motor
-#define SPEED_CALIBRATION ((150 - 90) / 100.0) // (max value - stopping value) / (half of total speed range wanted, i.e. -100 to 100)
+#define STOP_VAL 93 //center value / value that stops the motor
+#define SPEED_CALIBRATION ((150 - STOP_VAL) / 100.0) // (max value - stopping value) / (half of total speed range wanted, i.e. -100 to 100)
 #define BEARING_CALIBRATION  0.06 //Sets the tolerance range (approximately 1% of 2 PI)
 #define PI_VAL  3.14159265 //PI
 
@@ -42,6 +42,11 @@ namespace Rover {
 	void Drive::halt() { //Stop the motors
 		lServo.write(STOP_VAL);
 		rServo.write(STOP_VAL);
+	}
+	
+	void Drive::detach() {
+		lServo.detach();
+		rServo.detach();
 	}
 
 	void Drive::centerTurn(int speed) { //turn left if negative, right if positive

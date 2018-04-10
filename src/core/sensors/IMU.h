@@ -8,6 +8,8 @@
 #include "Arduino.h"
 #include "../utilities/Vector.h"
 
+#define sample_size 10
+
 /**
  * This class is intended to abstractify the IMU (and
  * related measurement units. Whether or not it is needed
@@ -38,6 +40,11 @@ private:
 
     //The stored robot states as calculated in this class...
     //Position and orientation
+	float filter[sample_size];
+	float filter_sum;
+	unsigned char shifter;
+
+public:
 	
 	float accel_x_offset;
 	float accel_y_offset;
@@ -45,9 +52,6 @@ private:
 	float gyro_x_offset;
 	float gyro_y_offset;
 	float gyro_z_offset;
-	
-
-public:
     typedef struct{
         int32_t timestamp;      /**< time is in milliseconds */
         union {

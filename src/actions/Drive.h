@@ -19,6 +19,7 @@ namespace Rover {
 		//positive for forward, negative for backwards
 		void drive(int speed);
 		void halt();
+		void detach();
 		//turns around the center axis of the rover, turn left for positive, right for negative
 		void centerTurn(int speed);
 		//turns around the inside wheel, left is positive, right is negative
