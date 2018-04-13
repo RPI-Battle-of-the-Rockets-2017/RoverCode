@@ -5,9 +5,10 @@
 #define DELAY_READ      100
 #define L_THRESHOLD     100
 #define U_THRESHOLD     250
-#define ROTATION_VAL    3      //the sign of this value denotes direction
+#define ROTATION_VAL    5      //the sign of this value denotes direction
 #define STOP_VAL        92
 #define INIT_DIRECTION  -1
+#define INIT_TIME		500*1000
 #define TIMEOUT         10*1000
 
 namespace Rover {
@@ -22,6 +23,14 @@ void CameraServo::detach(){
     //pinMode(sensorPin, INPUT);
 }
 
+void CameraServo::initialTurn(){
+	attach();
+	camera.write(STOP_VAL+INIT_DIRECTION*ROTATION_VAL);
+	delayMicroseconds(INIT_TIME);
+	camera.write(STOP_VAL);
+	detach();
+}
+
 void CameraServo::resetPosition(){
     if (position == -1) zeroPosition();
     position = 0;
@@ -32,13 +41,12 @@ bool CameraServo::zeroPosition(){
         //Start and move the servo
 		attach();
         camera.write(STOP_VAL+INIT_DIRECTION*ROTATION_VAL);
-
         //Record timeout values
         uint32_t start_time = millis();
         bool timed_out;
 
         //Move until threshold achieved for initial position
-        while(analogRead(sensorPin) <= U_THRESHOLD && timed_out = (millis() - start_time < TIMEOUT))
+        while(analogRead(sensorPin) <= U_THRESHOLD && (timed_out = (millis() - start_time < TIMEOUT)))
             delayMicroseconds(DELAY_READ);
 
         //Stop the servo and set position
@@ -81,9 +89,9 @@ bool CameraServo::moveToPosition(unsigned short position){
         bool timed_out;
 
         //Move until timeout or until thresholds are achieved
-        while(analogRead(sensorPin) >= L_THRESHOLD && timed_out = (millis() - start_time < TIMEOUT))
+        while(analogRead(sensorPin) >= L_THRESHOLD && (timed_out = (millis() - start_time < TIMEOUT)))
             delayMicroseconds(DELAY_READ);
-        while(analogRead(sensorPin) <= U_THRESHOLD && timed_out = (millis() - start_time < TIMEOUT))
+        while(analogRead(sensorPin) <= U_THRESHOLD && (timed_out = (millis() - start_time < TIMEOUT)))
             delayMicroseconds(DELAY_READ);
 
         //Stop the camera

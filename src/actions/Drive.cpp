@@ -14,6 +14,7 @@ namespace Rover {
 	}
 
 	void Drive::drive(int speed) {//takes an input value from -100(reverse) to 100(forward)
+		attach();
 		correction = desiredHeading - imu->getHeading(); //obtain a new correction for each call to the drive function
 		if (correction > PI_VAL) { //correct for moving at max one pi radians in either direction 
 			correction = correction - 2 * PI_VAL;
@@ -42,6 +43,7 @@ namespace Rover {
 	void Drive::halt() { //Stop the motors
 		lServo.write(STOP_VAL);
 		rServo.write(STOP_VAL);
+		detach();
 	}
 	
 	void Drive::detach() {
@@ -50,6 +52,7 @@ namespace Rover {
 	}
 
 	void Drive::centerTurn(int speed) { //turn left if negative, right if positive
+		attach();
 		int lSpeed;
 		int rSpeed;
 		if (rightServReversed) {

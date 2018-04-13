@@ -19,6 +19,8 @@ public:
 
     //Get the position of camera servo
     short getPosition() const { return position; };
+	
+	void initialTurn();
 
     //make the current position of the servo 0, unless it's -1, where it'll just zero the position.
     void resetPosition();
