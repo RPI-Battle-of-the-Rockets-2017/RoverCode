@@ -19,7 +19,7 @@ public:
 
     //Get the position of camera servo
     short getPosition() const { return position; };
-	
+
 	void initialTurn();
 
     //make the current position of the servo 0, unless it's -1, where it'll just zero the position.
@@ -34,7 +34,7 @@ public:
     bool moveToPosition(unsigned short position);
 
     //Move the camera to the next incremental position, wrapping 4 around to 0
-    bool nextPosition() { return moveToPosition(position++); };
+    bool nextPosition() { return moveToPosition(position+1); };
 
     //Publicly accesible reversed bool
     const bool reversed;
