@@ -35,9 +35,9 @@ public:
         void sendGPSData(long latitude, long longitude);
         void establishComm();
 
-        void initiateImage();
-        void sendImage(uint8_t *buffer, uint8_t size);
-        void endImage();
+        bool initiateImage();
+        bool sendImage(uint8_t *buffer, uint8_t size);
+        bool endImage();
 private:
         void sendPacket(uint8_t *buffer, MSG_TYPE type, uint8_t len);
         void sendQueuedPacket();

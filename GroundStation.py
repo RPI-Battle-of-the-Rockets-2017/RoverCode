@@ -47,7 +47,9 @@ def ProcessMessage(msg):
 
         elif msg_type == '\x01':
             print("Initiate image")
-            #f = open('image' + image_num + '.jpg', 'w')
+            global image_num
+            global f
+            f = open('image' + str(image_num) + '.jpg', 'w+')
             print("Here1")
             ser.write(cobs.encode(sequence_num) + '\x00')
             print("Here2")
@@ -55,13 +57,13 @@ def ProcessMessage(msg):
         elif msg_type == '\x02':
             print("Image Data")
             print(bytearray(decoded[4:]))
-            #f.write(bytearray(decoded[4:]))
+            f.write(bytearray(decoded[4:]))
             ser.write(cobs.encode(sequence_num) + '\x00')
 
         elif msg_type == '\x03':
             print("End image")
-            #f.close();
-            #im = Image.open('image' + image_num + '.jpg')
+            f.close();
+            #im = Image.open('image' + str(image_num) + '.jpg')
             #im.show()
             ser.write(cobs.encode(sequence_num) + '\x00')
             image_num += 1
@@ -89,10 +91,8 @@ while 1:
     if ser.inWaiting():
         newByte = ser.read()
         if newByte == '\x00':
-            try:
-                ProcessMessage(msg)
-            except:
-                pass
+            #try:
+            ProcessMessage(msg)
             msg = ''
         else:
             msg += newByte

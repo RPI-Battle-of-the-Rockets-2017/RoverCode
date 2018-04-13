@@ -18,8 +18,8 @@ namespace Rover {
 // or call Servo, and wrap the servo library into here. Allows easier changing.
 class SDUtils {
   public:
-    SDUtils(int chipSelect = 53);
-    void writeImage(Camera &cam, Telemetry &tel);
+    SDUtils(int chipSelect);
+    void writeImage(Camera &cam, Telemetry &tel, int index);
     File* getFile() { return &currFile; };
 
   private:

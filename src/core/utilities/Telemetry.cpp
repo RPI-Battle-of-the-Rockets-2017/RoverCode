@@ -37,31 +37,46 @@ void Telemetry::establishComm() {
     sendPacket(0, MSG_TYPE::ESTABLISH_COMM, 0);
 }
 
-void Telemetry::initiateImage() {
+bool Telemetry::initiateImage() {
     while (!comms_established) {
         update();
     }
     sendPacket(0, MSG_TYPE::INITIATE_IMAGE, 0);
     debug_ser->println("Sent packet");
+	int i = 0;
     while (!message_confirmed) {
         pack_ser.update();
+		i++;
+		delay(10);
+		if (i > 300) return false;
     }
     debug_ser->println("Confirmed");
+	return true;
 }
 
-void Telemetry::sendImage(uint8_t *buffer, uint8_t size) {
+bool Telemetry::sendImage(uint8_t *buffer, uint8_t size) {
     sendPacket(buffer, MSG_TYPE::IMAGE, size);
-
+	
+	int i = 0;
     while (!message_confirmed) {
         pack_ser.update();
+		i++;
+		delay(1);
+		if (i > 3000) return false;
     }
+	return true;
 }
 
-void Telemetry::endImage() {
+bool Telemetry::endImage() {
     sendPacket(0, MSG_TYPE::END_IMAGE, 0);
+	int i = 0;
     while (!message_confirmed) {
+		i++;
+		delay(10);
+		if (i > 300) return false;
         pack_ser.update();
     }
+	return true;
 }
 
 void Telemetry::sendBaroHeight(int height) {
@@ -97,7 +112,7 @@ void Telemetry::sendGPSData(long latitude, long longitude)
 
 void Telemetry::processTelem(const uint8_t *buffer, uint16_t size) {
     //Size is 1 for normal confirmation
-    debug_ser->println("processing telem");
+    //debug_ser->println("processing telem");
     if (size == 1) {
         if (buffer[0] == sequence_num) {
             sequence_num++;
