@@ -14,14 +14,17 @@ def refreshBaroData(i):
         if len(line) > 1:
             x, y = line.split(",")
             xValues.append(float(x))
-            yValues.append(float(y))
+            yValues.append(float(y) - 394)
 
-    lists = sorted(itertools.izip(*[xValues,yValues]))
-    new_x, new_y = list(itertools.izip(*lists))
-    print(new_y)
+    try:
+        lists = sorted(itertools.izip(*[xValues,yValues]))
+        new_x, new_y = list(itertools.izip(*lists))
+        print(new_y)
+        baro.clear()
+        baro.plot(new_x, new_y)
+    except:
+        pass
 
-    baro.clear()
-    baro.plot(new_x, new_y)
 
 ani = animation.FuncAnimation(fig, refreshBaroData, interval = 1000)
 pyplot.show()

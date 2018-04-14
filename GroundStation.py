@@ -57,7 +57,7 @@ def ProcessMessage(msg):
         elif msg_type == '\x02':
             print("Image Data")
             print(bytearray(decoded[4:]))
-            f.write(bytearray(decoded[4:]))
+            f.write(bytearray(decoded[4:(length - 1)]))
             ser.write(cobs.encode(sequence_num) + '\x00')
 
         elif msg_type == '\x03':
@@ -81,9 +81,9 @@ def ProcessMessage(msg):
             pos = struct.unpack("<ll", decoded[4:])
             print("GPS:")
             print("Lat: ", end='')
-            print(pos[0], end='')
+            print(pos[0] / 100000.0, end='')
             print(" Long: ", end='')
-            print(pos[1])
+            print(pos[1] / 100000.0)
             ser.write(cobs.encode(sequence_num) + '\x00')
 
 ser.reset_input_buffer()
@@ -91,8 +91,10 @@ while 1:
     if ser.inWaiting():
         newByte = ser.read()
         if newByte == '\x00':
-            #try:
-            ProcessMessage(msg)
+            try:
+                ProcessMessage(msg)
+            except:
+                pass
             msg = ''
         else:
             msg += newByte
