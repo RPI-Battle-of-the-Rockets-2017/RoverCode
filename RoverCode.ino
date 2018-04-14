@@ -13,17 +13,22 @@
 // This program requires the ArduCAM V4.0.0 (or later) library and ArduCAM 2MP/5MP shield
 // and use Arduino IDE 1.6.8 compiler or above
 
-#include "src/core/sensors/Arducam.h"
+#include "src/core/sensors/ArduCAM.h"
+#include "src/core/components/NichromeCutter.h"
 #include <Servo.h>
 
-#define CAMERA_SERVO_PIN 6
-#define CAMERA_SERVO_STOPPED 90
+#define CAMERA_SERVO_PIN 9
+#define STRATOLOGGER_PIN 7
+#define CAMERA_SERVO_STOPPED 93
 #define CAMERA_SERVO_RUNNING 100
-#define SERVO_DELAY_TIME 1000
+#define SERVO_DELAY_TIME 500
+#define MAX_PICTURES 25
 
 Servo cam_servo;
+Rover::NichromeCutter nc(10);
 
 int state = 0;
+int count = 0;
 
 void setup(){
     Serial.begin(115200);
@@ -32,12 +37,10 @@ void setup(){
 void loop(){
   switch(state) {
     case 0:
-      /*
-      if (altimeter reached)
-        state = 1;
-        delay till landed
-      */
-     
+      while(digitalRead(7)==HIGH);
+      state = 1;
+      delay(30*1000);
+      nc.activate(5000);
       break;
     case 1:
       cam_servo.attach(CAMERA_SERVO_PIN);
@@ -49,9 +52,14 @@ void loop(){
       break;
     case 2:
       myCAMSaveToSDFile();
+      count++;
       delay(5000);
       state = 1;
+      if(count>=MAX_PICTURES)
+        state = 3;
       break;
+    case 3:
+      while(1);
     default:
       break;
   }
